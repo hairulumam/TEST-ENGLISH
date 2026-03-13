@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tes Bahasa Inggris AKPOL 2026</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;background:#f4f6fa;color:#1a1a2e;min-height:100vh}
+  .container{max-width:820px;margin:0 auto;padding:16px}
+
+  /* ── TOPBAR ── */
+  .topbar{background:#0d2b6b;color:#fff;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-radius:0 0 12px 12px}
+  .topbar-title{font-size:13px;font-weight:600;letter-spacing:.02em}
+  .topbar-right{display:flex;align-items:center;gap:12px}
+  .timer-box{background:rgba(255,255,255,.15);border-radius:8px;padding:4px 12px;font-size:14px;font-weight:700;min-width:68px;text-align:center;letter-spacing:.04em}
+  .timer-box.warn{background:#b91c1c;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+  .sec-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600}
+
+  /* ── PROGRESS ── */
+  .prog-wrap{margin:14px 0 10px}
+  .prog-bar{height:5px;background:#dde3ef;border-radius:3px;overflow:hidden}
+  .prog-fill{height:100%;background:#1d4ed8;border-radius:3px;transition:width .3s}
+  .prog-label{font-size:11px;color:#6b7280;margin-top:4px;display:flex;justify-content:space-between}
+
+  /* ── SCREEN ── */
+  .screen{display:none}.screen.active{display:block}
+
+  /* ── START SCREEN ── */
+  .start-card{background:#fff;border-radius:16px;border:1px solid #e5e7eb;padding:32px 28px;text-align:center;margin-top:20px}
+  .start-logo{width:72px;height:72px;background:#0d2b6b;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+  .start-logo svg{width:36px;height:36px;fill:#f59e0b}
+  .start-title{font-size:22px;font-weight:700;color:#0d2b6b;margin-bottom:6px}
+  .start-sub{font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:24px}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;text-align:left}
+  .info-item{background:#f8faff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px}
+  .info-lbl{font-size:11px;color:#6b7280;margin-bottom:2px}
+  .info-val{font-size:15px;font-weight:700;color:#0d2b6b}
+  .section-table{background:#f8faff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:24px;text-align:left}
+  .section-row{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;font-size:13px;border-bottom:1px solid #e5e7eb}
+  .section-row:last-child{border-bottom:none}
+  .section-row .sname{color:#1a1a2e;font-weight:500}
+  .section-row .scount{color:#6b7280;font-size:12px}
+  .scoring-note{background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:24px;text-align:left}
+
+  /* ── Q-NAV DOTS ── */
+  .qnav-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px}
+  .qnav-title{font-size:11px;color:#6b7280;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+  .dots{display:flex;flex-wrap:wrap;gap:5px}
+  .dot{width:30px;height:30px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid #d1d5db;background:#fff;color:#6b7280;display:flex;align-items:center;justify-content:center;transition:all .12s}
+  .dot:hover{background:#eff6ff;border-color:#93c5fd}
+  .dot.answered{background:#dbeafe;border-color:#3b82f6;color:#1d4ed8}
+  .dot.current{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+  .dot.answered.current{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+
+  /* ── PASSAGE ── */
+  .passage-box{background:#f0f4ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px 16px;margin-bottom:14px;max-height:230px;overflow-y:auto;font-size:13px;line-height:1.75;color:#374151}
+  .passage-title{font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .passage-box p{margin-bottom:.65em}
+
+  /* ── QUESTION CARD ── */
+  .q-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px 22px;margin-bottom:12px}
+  .q-meta{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .q-num-badge{background:#0d2b6b;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .q-sec-tag{background:#f3f4f6;color:#6b7280;font-size:11px;padding:3px 8px;border-radius:20px}
+  .q-text{font-size:14px;font-weight:600;line-height:1.6;color:#111827;margin-bottom:14px}
+  .options{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;align-items:flex-start;gap:12px;padding:11px 15px;border:1.5px solid #e5e7eb;border-radius:10px;cursor:pointer;background:#fff;font-size:13.5px;color:#374151;text-align:left;width:100%;transition:all .12s;line-height:1.5}
+  .opt:hover{background:#f0f4ff;border-color:#93c5fd}
+  .opt.selected{border-color:#1d4ed8;background:#eff6ff;color:#1e3a8a}
+  .opt-key{font-weight:700;font-size:12px;min-width:20px;color:#9ca3af;flex-shrink:0;margin-top:1px}
+  .opt.selected .opt-key{color:#1d4ed8}
+
+  /* ── SECTION HEADER ── */
+  .sec-header{background:#0d2b6b;color:#fff;border-radius:10px;padding:10px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+  .sec-header-name{font-size:13px;font-weight:700}
+  .sec-header-range{font-size:11px;color:rgba(255,255,255,.7)}
+
+  /* ── NAV BUTTONS ── */
+  .nav{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+  .btn{padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid #d1d5db;background:#fff;color:#374151;transition:all .12s}
+  .btn:hover{background:#f3f4f6}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+  .btn.primary:hover{background:#1e40af}
+  .btn.danger{background:#b91c1c;color:#fff;border-color:#b91c1c}
+  .btn.danger:hover{background:#991b1b}
+  .btn.success{background:#059669;color:#fff;border-color:#059669}
+  .btn.success:hover{background:#047857}
+  .spacer{flex:1}
+
+  /* ── SCORE SCREEN ── */
+  .score-wrap{padding:20px 0}
+  .score-circle-wrap{text-align:center;margin-bottom:24px}
+  .score-circle{width:130px;height:130px;border-radius:50%;margin:0 auto 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:4px solid #1d4ed8}
+  .score-big{font-size:36px;font-weight:800}
+  .score-max{font-size:13px;color:#6b7280}
+  .score-msg{font-size:18px;font-weight:700;color:#111827;margin-bottom:4px}
+  .score-grade{font-size:13px;color:#6b7280}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+  .stat-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-align:center}
+  .stat-num{font-size:26px;font-weight:800}
+  .stat-lbl{font-size:11px;color:#6b7280;margin-top:2px;font-weight:500}
+  .stat-num.g{color:#059669}.stat-num.r{color:#b91c1c}.stat-num.gray{color:#6b7280}
+  .breakdown{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:16px}
+  .brow{display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:13px;border-bottom:1px solid #f3f4f6}
+  .brow:last-child{border-bottom:none}
+  .brow-name{flex:1;color:#374151;font-weight:500}
+  .brow-stat{color:#6b7280;font-size:12px}
+  .brow-pct{font-weight:700;font-size:13px;min-width:42px;text-align:right}
+  .wrong-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:14px 16px;margin-bottom:20px}
+  .wrong-box-title{font-size:12px;font-weight:700;color:#991b1b;margin-bottom:6px}
+  .wrong-nums{font-size:13px;color:#b91c1c;line-height:1.9}
+  .score-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  /* ── REVIEW SCREEN ── */
+  .review-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .review-hdr-title{font-size:15px;font-weight:700;color:#0d2b6b}
+  .review-badge{background:#fef2f2;color:#b91c1c;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:600}
+  .review-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px 22px;margin-bottom:12px}
+  .rmeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+  .rbadge-wrong{background:#fef2f2;color:#b91c1c;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700}
+  .rbadge-sec{background:#f3f4f6;color:#6b7280;border-radius:20px;padding:3px 8px;font-size:11px}
+  .rbadge-your{background:#fef9c3;color:#854d0e;border-radius:20px;padding:3px 8px;font-size:11px;font-weight:600}
+  .review-opts{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+  .ropt{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-radius:10px;font-size:13.5px;border:1.5px solid transparent;line-height:1.5}
+  .ropt-key{font-weight:700;min-width:20px;flex-shrink:0;margin-top:1px;font-size:12px}
+  .ropt.normal{background:#f9fafb;color:#374151;border-color:#f3f4f6}.ropt.normal .ropt-key{color:#9ca3af}
+  .ropt.correct{background:#f0fdf4;border-color:#86efac;color:#14532d}.ropt.correct .ropt-key{color:#16a34a}
+  .ropt.wrong-chosen{background:#fef2f2;border-color:#fca5a5;color:#7f1d1d}.ropt.wrong-chosen .ropt-key{color:#b91c1c}
+  .ropt-tag{margin-left:auto;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+  .exp-box{background:#f0f4ff;border-left:4px solid #1d4ed8;border-radius:0 10px 10px 0;padding:12px 16px;font-size:13px;line-height:1.65;color:#374151}
+  .exp-label{font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:520px){
+    .info-grid{grid-template-columns:1fr}
+    .stats-grid{grid-template-columns:1fr 1fr 1fr}
+    .nav{gap:8px}
+    .btn{padding:8px 12px;font-size:12px}
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR (shown in exam) -->
+<div class="topbar" id="topbar" style="display:none">
+  <div class="topbar-title">Tes Bahasa Inggris — AKPOL 2026</div>
+  <div class="topbar-right">
+    <span class="sec-badge" id="sec-badge">Section I</span>
+    <div class="timer-box" id="timer">60:00</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════ START ═══════════════ -->
+<div id="scr-start" class="screen active">
+  <div class="start-card">
+    <div class="start-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.25 3.75 10.15 9 11.35C17.25 23.15 21 18.25 21 13V7L12 2z"/></svg>
+    </div>
+    <div class="start-title">Tes Bahasa Inggris</div>
+    <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">Seleksi AKPOL 2026</div>
+    <div class="start-sub">Kerjakan semua soal hingga selesai. Jawaban dan pembahasan baru akan ditampilkan <strong>setelah ujian selesai</strong>. Review hanya untuk soal yang <strong>dijawab salah</strong>.</div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-lbl">Jumlah soal</div><div class="info-val">60 soal</div></div>
+      <div class="info-item"><div class="info-lbl">Waktu ujian</div><div class="info-val">60 menit</div></div>
+      <div class="info-item"><div class="info-lbl">Jawaban benar</div><div class="info-val" style="color:#059669">+4 poin</div></div>
+      <div class="info-item"><div class="info-lbl">Jawaban salah</div><div class="info-val" style="color:#b91c1c">−1 poin</div></div>
+    </div>
+    <div class="section-table">
+      <div class="section-row"><span class="sname">Section I &mdash; Reading Comprehension</span><span class="scount">No. 1–20 &nbsp;(20 soal)</span></div>
+      <div class="section-row"><span class="sname">Section II &mdash; Structure &amp; Grammar</span><span class="scount">No. 21–35 (15 soal)</span></div>
+      <div class="section-row"><span class="sname">Section III &mdash; Vocabulary</span><span class="scount">No. 36–45 (10 soal)</span></div>
+      <div class="section-row"><span class="sname">Section IV &mdash; Error Identification</span><span class="scount">No. 46–50 &nbsp;(5 soal)</span></div>
+      <div class="section-row"><span class="sname">Section V &mdash; Cloze Test</span><span class="scount">No. 51–60 (10 soal)</span></div>
+    </div>
+    <div class="scoring-note">&#9888; Strategi: Jawab soal yang kamu yakin dulu. Tebak hanya jika peluang benar &gt;50% (karena ada penalti -1 untuk salah). Nilai maksimum: <strong>240 poin</strong>.</div>
+    <button class="btn primary" onclick="startExam()" style="padding:13px 40px;font-size:15px;width:100%">Mulai Ujian Sekarang</button>
+  </div>
+</div>
+
+<!-- ═══════════════ EXAM ═══════════════ -->
+<div id="scr-exam" class="screen">
+  <div class="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-label"><span id="prog-txt">Soal 1 dari 60</span><span id="ans-count">0 dijawab</span></div>
+  </div>
+  <div class="qnav-card">
+    <div class="qnav-title">Navigasi Soal</div>
+    <div class="dots" id="dots"></div>
+  </div>
+  <div id="sec-header-area"></div>
+  <div id="passage-area"></div>
+  <div id="q-area"></div>
+  <div class="nav">
+    <button class="btn" id="btn-prev" onclick="goTo(curQ-1)">&#8592; Sebelumnya</button>
+    <span class="spacer"></span>
+    <button class="btn" id="btn-next" onclick="goTo(curQ+1)">Selanjutnya &#8594;</button>
+    <button class="btn danger" id="btn-submit" onclick="confirmSubmit()" style="display:none">Kumpulkan &amp; Lihat Skor</button>
+  </div>
+</div>
+
+<!-- ═══════════════ SCORE ═══════════════ -->
+<div id="scr-score" class="screen">
+  <div class="score-wrap">
+    <div class="score-circle-wrap">
+      <div class="score-circle" id="score-circle">
+        <div class="score-big" id="score-val">0</div>
+        <div class="score-max">/ 240</div>
+      </div>
+      <div class="score-msg" id="score-msg"></div>
+      <div class="score-grade" id="score-grade"></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num g" id="s-cor">0</div><div class="stat-lbl">Benar</div></div>
+      <div class="stat-box"><div class="stat-num r" id="s-wrg">0</div><div class="stat-lbl">Salah</div></div>
+      <div class="stat-box"><div class="stat-num gray" id="s-skp">0</div><div class="stat-lbl">Tidak dijawab</div></div>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+    <div class="wrong-box" id="wrong-box" style="display:none">
+      <div class="wrong-box-title">Soal yang dijawab salah:</div>
+      <div class="wrong-nums" id="wrong-nums"></div>
+    </div>
+    <div class="score-btns">
+      <button class="btn danger" id="btn-review-start" onclick="startReview()" style="display:none">Review Soal yang Salah</button>
+      <button class="btn" onclick="restartExam()">Ulangi Ujian</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ REVIEW ═══════════════ -->
+<div id="scr-review" class="screen">
+  <div class="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="rev-prog" style="width:0%"></div></div>
+    <div class="prog-label"><span id="rev-prog-txt"></span><span style="color:#b91c1c;font-weight:600">Fokus soal salah saja</span></div>
+  </div>
+  <div id="rev-area"></div>
+  <div class="nav">
+    <button class="btn" id="rbtn-prev" onclick="revNav(-1)">&#8592; Sebelumnya</button>
+    <span class="spacer"></span>
+    <button class="btn" id="rbtn-next" onclick="revNav(1)">Selanjutnya &#8594;</button>
+    <button class="btn success" id="rbtn-done" onclick="showScr('scr-score')" style="display:none">Selesai Review</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const PASS = {
+  p1:{
+    title:"Text 1: The Role of the National Police in Indonesia",
+    html:`<p>The Indonesian National Police, known as Polri (Kepolisian Negara Republik Indonesia), is one of the most crucial institutions in maintaining law, order, and public security throughout the archipelago. Established as an independent institution separate from the armed forces in 2000, Polri has undergone significant structural and cultural reforms to align itself with democratic principles and modern policing standards.</p>
+<p>One of the most prominent reform programs launched in recent years is the PRESISI program — standing for Prediktif (Predictive), Responsibilitas (Responsibility), and Transparansi Berkeadilan (Transparent Justice). This initiative was introduced under the leadership of Police Chief General Listyo Sigit Prabowo with the goal of transforming Polri into a technology-driven, community-oriented institution that prioritizes human rights and accountability.</p>
+<p>The Akademi Kepolisian (AKPOL), located in Semarang, Central Java, serves as the premier educational institution for producing high-calibre police officers. Cadets undergo rigorous academic, physical, and psychological training for four years before being commissioned as Second Inspectors (Inspektur Polisi Dua / Ipda). The academy's curriculum integrates national security studies, law enforcement techniques, ethics, and English proficiency — reflecting the growing importance of international cooperation in combating transnational crimes.</p>
+<p>As Indonesia continues to face complex security challenges — including terrorism, cybercrime, human trafficking, and narcotics — the role of well-educated, professional police officers becomes ever more critical. The nation looks to institutions like AKPOL to produce the next generation of leaders who can uphold justice with integrity, wisdom, and a deep commitment to the values of Pancasila.</p>`
+  },
+  p2:{
+    title:"Text 2: Cybercrime — A Growing Threat to National Security",
+    html:`<p>In the digital age, cybercrime has emerged as one of the most sophisticated and rapidly evolving threats to national security worldwide. Indonesia, as one of Southeast Asia's largest digital economies, is particularly vulnerable. With over 210 million internet users as of 2024, the country presents an attractive target for cybercriminals ranging from individual hackers to state-sponsored groups.</p>
+<p>Cybercrime takes many forms: phishing attacks that trick individuals into revealing sensitive information, ransomware that encrypts data and demands payment for its release, online fraud, identity theft, and cyber espionage targeting government and corporate networks. The financial losses attributed to cybercrime in Indonesia have reached billions of rupiah annually, affecting both private citizens and government institutions.</p>
+<p>To counter this threat, Indonesia established the National Cyber and Crypto Agency (Badan Siber dan Sandi Negara / BSSN) in 2017. BSSN is responsible for coordinating national cybersecurity efforts, protecting critical information infrastructure, and supporting law enforcement agencies including Polri in investigating cyber-related crimes. The Directorate of Cyber Crime within Polri's Criminal Investigation Agency (Bareskrim) also plays a frontline role in identifying, tracking, and prosecuting cybercriminals.</p>
+<p>Experts argue that effective cybersecurity requires a multi-layered approach: strong legislation, advanced technical capabilities, public awareness campaigns, and international cooperation. For future police officers entering institutions like AKPOL, understanding the fundamentals of cybercrime and digital forensics is no longer optional — it is an essential competency for the 21st-century law enforcement professional.</p>`
+  },
+  p5:{
+    title:"Cloze Text — Law Enforcement in the Modern Era",
+    html:`<p>Law enforcement in the modern era requires officers who are not only physically fit but also intellectually <strong>(51)______</strong>. The challenges of the 21st century — ranging from cybercrime to environmental crimes — demand that police officers possess a <strong>(52)______</strong> understanding of both traditional policing methods and cutting-edge technology.</p>
+<p>At AKPOL, cadets are <strong>(53)______</strong> to a broad curriculum that includes law, ethics, physical training, and foreign languages. The academy <strong>(54)______</strong> that its graduates can adapt to rapidly changing security environments.</p>
+<p>Community policing has also become a key <strong>(55)______</strong> of modern law enforcement strategy. Rather than <strong>(56)______</strong> only on reactive measures, officers are encouraged to build trust and <strong>(57)______</strong> relationships with local communities. This approach has been proven to <strong>(58)______</strong> crime rates significantly in several regions.</p>
+<p>Furthermore, integrity and ethics are <strong>(59)______</strong> the most important qualities an officer must possess. No matter how skilled or experienced an officer becomes, <strong>(60)______</strong> these values can lead to the collapse of public trust and the failure of the institution itself.</p>`
+  }
+};
+
+const SECS = {
+  1:{name:"Section I",full:"Section I — Reading Comprehension",lo:1,hi:20},
+  2:{name:"Section II",full:"Section II — Structure & Grammar",lo:21,hi:35},
+  3:{name:"Section III",full:"Section III — Vocabulary",lo:36,hi:45},
+  4:{name:"Section IV",full:"Section IV — Error Identification",lo:46,hi:50},
+  5:{name:"Section V",full:"Section V — Cloze Test",lo:51,hi:60}
+};
+function getSec(n){for(const[k,v]of Object.entries(SECS))if(n>=v.lo&&n<=v.hi)return v;return SECS[1];}
+
+const QS=[
+  {n:1,s:1,p:"p1",q:"What is the main topic of the passage?",A:"The history of AKPOL since its founding in Semarang",B:"The role and reform of the Indonesian National Police",C:"The challenge of narcotics and terrorism in Indonesia",D:"The personal leadership of Police Chief General Listyo Sigit Prabowo",E:"The academic curriculum at Akademi Kepolisian",a:"B",e:"The passage discusses Polri's role, its reform program (PRESISI), AKPOL's function, and the security challenges ahead — making the role and reform of Polri the central theme."},
+  {n:2,s:1,p:"p1",q:"According to the passage, PRESISI stands for Predictive, Responsibility, and...",A:"Transparent Justice",B:"Truthful Justice",C:"Transparent Judiciary",D:"Transparent Governance",E:"Transparent Jurisprudence",a:"A",e:"The passage explicitly states: 'PRESISI program — standing for Prediktif (Predictive), Responsibilitas (Responsibility), and Transparansi Berkeadilan (Transparent Justice).'"},
+  {n:3,s:1,p:"p1",q:"The word 'rigorous' in paragraph 3 is closest in meaning to...",A:"relaxed",B:"optional",C:"thorough and demanding",D:"brief and simple",E:"theoretical only",a:"C",e:"'Rigorous' means extremely thorough, exhaustive, and demanding. Cadets undergo 'rigorous training' — meaning very strict, intensive training over four years."},
+  {n:4,s:1,p:"p1",q:"Based on the passage, what rank do AKPOL graduates receive upon commissioning?",A:"Brigadir Polisi (Bripda)",B:"Komisaris Polisi (Kompol)",C:"Inspektur Polisi Satu (Iptu)",D:"Inspektur Polisi Dua (Ipda)",E:"Ajun Komisaris Polisi (AKP)",a:"D",e:"Paragraph 3 states cadets are 'commissioned as Second Inspectors (Inspektur Polisi Dua / Ipda)' after four years of training."},
+  {n:5,s:1,p:"p1",q:"Which of the following is NOT mentioned as a security challenge facing Indonesia?",A:"Terrorism",B:"Cybercrime",C:"Human trafficking",D:"Piracy at sea",E:"Narcotics",a:"D",e:"The passage lists terrorism, cybercrime, human trafficking, and narcotics. Piracy at sea is NOT mentioned anywhere in the text."},
+  {n:6,s:1,p:"p1",q:"The word 'accountability' in paragraph 2 is best replaced by...",A:"ignorance",B:"responsibility for one's actions",C:"financial profit",D:"military strength",E:"diplomatic immunity",a:"B",e:"'Accountability' means being responsible and answerable for one's actions — especially to the public or oversight bodies."},
+  {n:7,s:1,p:"p1",q:"The purpose of including English proficiency in AKPOL's curriculum is most likely to...",A:"Replace Bahasa Indonesia as the official language",B:"Support international cooperation in fighting transnational crimes",C:"Qualify cadets for jobs abroad",D:"Fulfil requirements set by the United Nations",E:"Allow cadets to study at foreign universities",a:"B",e:"Paragraph 3 states English is included 'reflecting the growing importance of international cooperation in combating transnational crimes.'"},
+  {n:8,s:1,p:"p1",q:"The tone of the passage can best be described as...",A:"Critical and sarcastic",B:"Informal and conversational",C:"Informative and formal",D:"Emotional and subjective",E:"Persuasive and argumentative",a:"C",e:"The passage presents factual information about Polri and AKPOL in a formal, objective manner — characteristic of an informative text."},
+  {n:9,s:1,p:"p1",q:"The phrase 'high-calibre police officers' in paragraph 3 means...",A:"Officers who carry high-calibre weapons",B:"Officers who are physically tall and strong",C:"Officers of excellent quality and capability",D:"Officers with senior rank",E:"Officers trained in foreign countries",a:"C",e:"'High-calibre' is a figurative expression meaning of excellent quality, skill, or ability — not related to weapons at all."},
+  {n:10,s:1,p:"p1",q:"What can be inferred from the last paragraph?",A:"Indonesia has already solved all its security challenges",B:"AKPOL produces graduates who are only focused on physical strength",C:"The values of Pancasila are irrelevant to modern policing",D:"Professional and principled officers are essential for Indonesia's future security",E:"The government plans to abolish AKPOL in the near future",a:"D",e:"The final paragraph implies that well-educated, professional officers with integrity and Pancasila values are crucial for Indonesia's complex security future."},
+  {n:11,s:1,p:"p2",q:"According to the passage, why is Indonesia particularly vulnerable to cybercrime?",A:"Because it has a weak legal system",B:"Because it lacks a national police force",C:"Because of its large number of internet users and its status as a major digital economy",D:"Because it has no cybersecurity agency",E:"Because cybercriminals are based inside Indonesia",a:"C",e:"Paragraph 1 states: 'With over 210 million internet users... the country presents an attractive target' — and Indonesia is 'one of Southeast Asia's largest digital economies.'"},
+  {n:12,s:1,p:"p2",q:"The word 'sophisticated' in paragraph 1 is closest in meaning to...",A:"simple and straightforward",B:"highly complex and advanced",C:"old-fashioned and outdated",D:"dangerous and violent",E:"secretive and illegal",a:"B",e:"'Sophisticated' means highly developed, complex, or advanced. Cybercrime is 'sophisticated' because it uses advanced technology and complex methods."},
+  {n:13,s:1,p:"p2",q:"What is 'ransomware' as described in the passage?",A:"A virus that destroys hardware permanently",B:"A program that encrypts data and demands payment for its release",C:"A type of phishing email sent to government officials",D:"Software used by BSSN to track criminals",E:"A method of identity theft through social media",a:"B",e:"Paragraph 2 defines it clearly: 'ransomware that encrypts data and demands payment for its release.'"},
+  {n:14,s:1,p:"p2",q:"BSSN was established to...",A:"Replace Polri in handling all criminal investigations",B:"Manage Indonesia's foreign intelligence operations",C:"Coordinate national cybersecurity and support law enforcement against cyber crimes",D:"Provide internet access to rural communities",E:"Regulate social media content in Indonesia",a:"C",e:"Paragraph 3: 'BSSN is responsible for coordinating national cybersecurity efforts... and supporting law enforcement agencies including Polri in investigating cyber-related crimes.'"},
+  {n:15,s:1,p:"p2",q:"The Directorate of Cyber Crime is part of...",A:"BSSN",B:"Polri's Criminal Investigation Agency (Bareskrim)",C:"The Ministry of Communication and Information Technology",D:"The National Intelligence Agency (BIN)",E:"The Attorney General's Office",a:"B",e:"Paragraph 3: 'The Directorate of Cyber Crime within Polri's Criminal Investigation Agency (Bareskrim) also plays a frontline role...'"},
+  {n:16,s:1,p:"p2",q:"According to experts, effective cybersecurity requires all of the following EXCEPT...",A:"Strong legislation",B:"Advanced technical capabilities",C:"Public awareness campaigns",D:"International cooperation",E:"Abolishing social media platforms",a:"E",e:"The passage mentions legislation, technical capabilities, public awareness, and international cooperation. Abolishing social media is never mentioned."},
+  {n:17,s:1,p:"p2",q:"The phrase 'multi-layered approach' in paragraph 4 suggests that cybersecurity...",A:"Can be solved by a single government agency alone",B:"Requires multiple combined strategies working together",C:"Is only possible with foreign assistance",D:"Depends entirely on advanced software tools",E:"Is too complex to be addressed effectively",a:"B",e:"'Multi-layered' means multiple levels working together. The paragraph lists four different strategies that must be combined."},
+  {n:18,s:1,p:"p2",q:"What does the author imply about cybersecurity knowledge for AKPOL cadets?",A:"It is a special elective for interested students",B:"It is irrelevant because police only deal with physical crimes",C:"It is a mandatory and essential competency for modern law enforcement",D:"It will be taught only to senior officers",E:"It is the responsibility of BSSN, not Polri",a:"C",e:"The last paragraph: 'understanding cybercrime and digital forensics is no longer optional — it is an essential competency for the 21st-century law enforcement professional.'"},
+  {n:19,s:1,p:"p2",q:"The word 'prosecuting' in paragraph 3 means...",A:"Releasing without charge",B:"Conducting legal proceedings against someone accused of a crime",C:"Providing legal defence for suspects",D:"Arresting suspects without evidence",E:"Monitoring online activity",a:"B",e:"'Prosecuting' means to conduct legal proceedings against a person charged with a crime — bringing them to trial in a court of law."},
+  {n:20,s:1,p:"p2",q:"What is the best title for this passage?",A:"How to Use the Internet Safely in Indonesia",B:"The History of BSSN and Its Founders",C:"Cybercrime: A Growing Threat and Indonesia's Response",D:"Why Indonesia Should Disconnect from the Internet",E:"The Role of Social Media in Modern Crime",a:"C",e:"The passage covers the nature of cybercrime, its impact on Indonesia, the agencies responding to it, and expert recommendations — making C the best title."},
+  {n:21,s:2,p:null,q:"The police officer, together with his colleagues, ______ currently investigating the robbery case.",A:"are",B:"were",C:"is",D:"have been",E:"being",a:"C",e:"When a subject is followed by 'together with + noun,' the verb agrees with the main subject 'The police officer' (singular) → 'is.'"},
+  {n:22,s:2,p:null,q:"By the time the reinforcements arrived, the suspects ______ the scene.",A:"already left",B:"have already left",C:"had already left",D:"will already leave",E:"already leaving",a:"C",e:"Past Perfect is used for an action completed before another past event. 'By the time... arrived' (simple past) requires 'had already left' (past perfect)."},
+  {n:23,s:2,p:null,q:"Neither the detective nor his assistants ______ able to identify the perpetrator.",A:"is",B:"was",C:"has been",D:"were",E:"being",a:"D",e:"With 'neither...nor,' the verb agrees with the noun closest to it ('his assistants' — plural) → 'were.'"},
+  {n:24,s:2,p:null,q:"The criminal was caught ______ he tried to cross the border.",A:"during",B:"while",C:"despite",D:"although",E:"unless",a:"B",e:"'While' introduces a clause showing two simultaneous actions. 'During' precedes a noun, not a clause. 'Although/despite' show contrast."},
+  {n:25,s:2,p:null,q:"If the officer ______ the proper procedure, the evidence would not have been dismissed.",A:"follows",B:"followed",C:"had followed",D:"has followed",E:"will follow",a:"C",e:"Type 3 (unreal past) conditional: 'If + past perfect, would have + V3.' The evidence WAS dismissed → 'had followed' is correct."},
+  {n:26,s:2,p:null,q:"The report ______ by the forensic team before the hearing tomorrow.",A:"will be submitted",B:"is submitted",C:"was submitted",D:"submits",E:"submitting",a:"A",e:"Future passive: 'will be + past participle.' The report has not yet been submitted (before tomorrow) and is submitted by someone → passive voice."},
+  {n:27,s:2,p:null,q:"The cadets who ______ the best academic scores were selected for the special programme.",A:"achieve",B:"achieved",C:"have achieve",D:"achieving",E:"to achieve",a:"B",e:"The relative clause is in the past (selection already happened) → 'achieved' (simple past)."},
+  {n:28,s:2,p:null,q:"She insisted that the suspect ______ held in custody overnight.",A:"is",B:"be",C:"was",D:"being",E:"to be",a:"B",e:"After verbs of demand/suggestion (insist, suggest, demand, recommend), use the subjunctive: base form → 'be.' Not 'is' or 'was.'"},
+  {n:29,s:2,p:null,q:"______ the lack of evidence, the prosecutor decided to proceed with the case.",A:"Because",B:"Due to",C:"Despite",D:"Therefore",E:"However",a:"C",e:"'Despite + noun/gerund' shows contrast (they proceeded even though there was lack of evidence). 'Due to' requires causal, not contrast relationship."},
+  {n:30,s:2,p:null,q:"The witness claimed ______ the suspect leaving the building at midnight.",A:"to see",B:"seeing",C:"seen",D:"have seen",E:"to have seen",a:"E",e:"'Claim + to have + V3' is used when the action occurred before the claiming. The witness claims a past observation → 'to have seen.'"},
+  {n:31,s:2,p:null,q:"It was the chief inspector ______ solved the cold case after twenty years.",A:"who",B:"whom",C:"whose",D:"which",E:"where",a:"A",e:"Cleft sentence: 'It was + noun + who/that + verb.' The chief inspector is a person and subject of the relative clause → 'who.'"},
+  {n:32,s:2,p:null,q:"The more training the cadets receive, ______ they become in the field.",A:"the more competent",B:"more competent",C:"the most competent",D:"most competent",E:"very competent",a:"A",e:"Double comparative structure: 'The + comparative..., the + comparative...' → 'The more training... the more competent.'"},
+  {n:33,s:2,p:null,q:"Hardly ______ the detective entered the room when he noticed a crucial clue.",A:"did",B:"had",C:"has",D:"does",E:"was",a:"B",e:"'Hardly... when' uses inversion with Past Perfect: 'Hardly + had + subject + V3... when + simple past.' → 'Hardly had the detective entered...'"},
+  {n:34,s:2,p:null,q:"The accused, ______ fingerprints were found at the scene, denied any involvement.",A:"who",B:"whom",C:"whose",D:"which",E:"that",a:"C",e:"'whose' is the possessive relative pronoun (fingerprints belonging to the accused). 'Who' = subject; 'whom' = object; both are not possessive."},
+  {n:35,s:2,p:null,q:"The police had no choice but ______ the area immediately after the explosion.",A:"evacuating",B:"to evacuate",C:"evacuate",D:"evacuated",E:"for evacuating",a:"B",e:"'Have no choice but + to-infinitive' is the correct structure → 'had no choice but to evacuate.'"},
+  {n:36,s:3,p:null,q:"The forensic investigator found ______ evidence at the crime scene that the case was swiftly solved.",A:"ambiguous",B:"inconclusive",C:"irrefutable",D:"fragile",E:"obsolete",a:"C",e:"'Irrefutable' = impossible to deny or disprove. The evidence was so strong it solved the case. 'Ambiguous' = unclear; 'inconclusive' = not proving anything."},
+  {n:37,s:3,p:null,q:"The officer's ______ behaviour during the hostage crisis earned him the highest commendation.",A:"reckless",B:"exemplary",C:"negligent",D:"impulsive",E:"indifferent",a:"B",e:"'Exemplary' = serving as a desirable model; outstanding. Earning the highest commendation indicates exceptional, not reckless or negligent, behaviour."},
+  {n:38,s:3,p:null,q:"The government decided to ______ the controversial law after widespread public protest.",A:"enforce",B:"ratify",C:"repeal",D:"enact",E:"consolidate",a:"C",e:"'Repeal' = to officially cancel a law. 'Enact' = make into law; 'ratify' = formally approve; 'enforce' = ensure compliance."},
+  {n:39,s:3,p:null,q:"The corruption scandal ______ the public trust in the institution severely.",A:"elevated",B:"reinforced",C:"eroded",D:"bolstered",E:"restored",a:"C",e:"'Eroded' = gradually worn away or destroyed. Trust severely damaged by scandal = eroded. 'Bolstered' = strengthened; 'elevated' = raised."},
+  {n:40,s:3,p:null,q:"The new police chief vowed to ______ corruption within the force without mercy.",A:"tolerate",B:"overlook",C:"eradicate",D:"promote",E:"encourage",a:"C",e:"'Eradicate' = to completely destroy or eliminate. 'Without mercy' signals total elimination, not toleration."},
+  {n:41,s:3,p:null,q:"The two countries signed a ______ agreement to share intelligence and combat terrorism jointly.",A:"unilateral",B:"bilateral",C:"multilateral",D:"territorial",E:"peripheral",a:"B",e:"'Bilateral' = involving two parties/countries. 'Unilateral' = one side only; 'multilateral' = many sides; 'territorial' = relating to territory."},
+  {n:42,s:3,p:null,q:"Police officers must remain ______ even in the most stressful situations to make sound decisions.",A:"impulsive",B:"agitated",C:"composed",D:"aggressive",E:"indecisive",a:"C",e:"'Composed' = calm and in control of one's emotions — essential for sound decision-making under pressure."},
+  {n:43,s:3,p:null,q:"The testimony of the eyewitness was considered ______ because of several inconsistencies.",A:"credible",B:"reliable",C:"dubious",D:"compelling",E:"definitive",a:"C",e:"'Dubious' = not reliable or suspect — causing doubt. Inconsistencies in testimony make it dubious, not credible or reliable."},
+  {n:44,s:3,p:null,q:"The police department launched a ______ campaign to educate the public about online scams.",A:"covert",B:"clandestine",C:"classified",D:"proactive",E:"secretive",a:"D",e:"'Proactive' = taking action in anticipation of problems. Public education campaigns are proactive (not covert or secretive) measures."},
+  {n:45,s:3,p:null,q:"The judge's ruling was considered ______ as it set a new precedent in constitutional law.",A:"trivial",B:"superficial",C:"landmark",D:"routine",E:"arbitrary",a:"C",e:"'Landmark' = marking an important stage; groundbreaking. A ruling that 'sets a new precedent' is by definition a landmark decision."},
+  {n:46,s:4,p:null,q:"The (A) suspect were (B) seen running (C) away from the (D) building (E) shortly after the alarm sounded.",A:"The",B:"were",C:"away from the",D:"building",E:"shortly after",a:"B",e:"Error: 'were' → 'was.' 'The suspect' is singular and requires a singular verb. Correct: 'The suspect was seen running...'"},
+  {n:47,s:4,p:null,q:"All (A) police officers (B) are expected (C) to behaves (D) professionally (E) at all times.",A:"All",B:"are expected",C:"to behaves",D:"professionally",E:"at all times",a:"C",e:"Error: 'to behaves' → 'to behave.' After the infinitive marker 'to,' use the base form of the verb — never with 's.'"},
+  {n:48,s:4,p:null,q:"The committee has been (A) working hard (B) for discussed (C) the new (D) security (E) protocol.",A:"has been working hard",B:"for discussed",C:"the new",D:"security",E:"protocol",a:"B",e:"Error: 'for discussed' → 'to discuss' (infinitive of purpose) or 'for discussing.' Correct: 'working hard to discuss the new protocol.'"},
+  {n:49,s:4,p:null,q:"Neither (A) the evidence (B) nor the witness (C) statements were (D) enough (E) to convict the accused.",A:"Neither",B:"nor the witness",C:"statements were",D:"enough",E:"to convict",a:"C",e:"Error: 'statements were' → 'statement was.' With 'neither...nor,' verb agrees with the nearest noun: 'the witness statement' (singular) → 'was.'"},
+  {n:50,s:4,p:null,q:"The cadet was (A) proud of (B) him achievement (C) and received (D) a commendation (E) from the academy.",A:"was proud of",B:"him achievement",C:"and received",D:"a commendation",E:"from the academy",a:"B",e:"Error: 'him achievement' → 'his achievement.' 'Him' is an object pronoun; before a noun, the possessive 'his' must be used."},
+  {n:51,s:5,p:"p5",q:"Select the correct word for blank (51):",A:"weak",B:"capable",C:"passive",D:"ignorant",E:"careless",a:"B",e:"The sentence contrasts 'physically fit' with intellectual ability. 'Capable' (able, competent) fits both the grammar and the meaning perfectly."},
+  {n:52,s:5,p:"p5",q:"Select the correct word for blank (52):",A:"narrow",B:"basic",C:"comprehensive",D:"vague",E:"limited",a:"C",e:"'Comprehensive' = covering all aspects thoroughly. The wide range of challenges listed requires broad, not narrow or basic, understanding."},
+  {n:53,s:5,p:"p5",q:"Select the correct word for blank (53):",A:"prohibited",B:"exposed",C:"excluded",D:"hidden",E:"restricted",a:"B",e:"'Exposed to a curriculum' = introduced to and given experience with. 'Exposed to' is a standard collocation meaning to be given access to something."},
+  {n:54,s:5,p:"p5",q:"Select the correct word for blank (54):",A:"doubts",B:"denies",C:"prevents",D:"ensures",E:"ignores",a:"D",e:"'Ensures' = makes certain. The academy 'ensures that its graduates can adapt' — meaning it takes steps to guarantee adaptability."},
+  {n:55,s:5,p:"p5",q:"Select the correct word for blank (55):",A:"obstacle",B:"problem",C:"pillar",D:"threat",E:"burden",a:"C",e:"'Pillar' = a fundamental support. Community policing as a 'key pillar' means it is a central, supporting element of the strategy."},
+  {n:56,s:5,p:"p5",q:"Select the correct word for blank (56):",A:"relying",B:"rely",C:"relied",D:"to rely",E:"relies",a:"A",e:"'Rather than + gerund (V-ing)': 'Rather than relying only on reactive measures.' The gerund (-ing) is required after 'rather than.'"},
+  {n:57,s:5,p:"p5",q:"Select the correct word for blank (57):",A:"hostile",B:"distant",C:"meaningful",D:"temporary",E:"superficial",a:"C",e:"'Meaningful relationships' = relationships with genuine value and significance. Community policing aims to build meaningful (not hostile or superficial) bonds."},
+  {n:58,s:5,p:"p5",q:"Select the correct word for blank (58):",A:"increase",B:"complicate",C:"reduce",D:"ignore",E:"worsen",a:"C",e:"Community policing is 'proven to reduce crime rates significantly.' Building community trust naturally reduces (not increases or worsens) crime."},
+  {n:59,s:5,p:"p5",q:"Select the correct word for blank (59):",A:"never",B:"barely",C:"seldom",D:"arguably",E:"rarely",a:"D",e:"'Arguably' = could be argued or considered. 'Integrity and ethics are arguably the most important qualities' — a strong but moderated assertion."},
+  {n:60,s:5,p:"p5",q:"Select the correct word for blank (60):",A:"upholding",B:"maintaining",C:"compromising",D:"developing",E:"strengthening",a:"C",e:"'Compromising these values can lead to the collapse of public trust.' To compromise values = to act against them, undermining the institution."}
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let answers={}, curQ=0, timerInt=null, timeLeft=3600, wrongList=[], revIdx=0;
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function showScr(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showTopbar(v){document.getElementById('topbar').style.display=v?'flex':'none';}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══════════════════════════════════════
+// EXAM INIT
+// ═══════════════════════════════════════
+function startExam(){
+  answers={};curQ=0;timeLeft=3600;wrongList=[];
+  showScr('scr-exam');showTopbar(true);
+  buildDots();renderQ();startTimer();
+}
+function restartExam(){showScr('scr-start');showTopbar(false);clearInterval(timerInt);}
+
+function startTimer(){
+  clearInterval(timerInt);
+  timerInt=setInterval(()=>{
+    timeLeft--;
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    const el=document.getElementById('timer');
+    el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    if(timeLeft<=300){el.classList.add('warn');}
+    if(timeLeft<=0){clearInterval(timerInt);submitExam();}
+  },1000);
+}
+
+// ═══════════════════════════════════════
+// DOTS
+// ═══════════════════════════════════════
+function buildDots(){
+  const wrap=document.getElementById('dots');wrap.innerHTML='';
+  QS.forEach((q,i)=>{
+    const d=document.createElement('button');
+    d.className='dot';d.id='d'+i;d.textContent=q.n;
+    d.onclick=()=>goTo(i);wrap.appendChild(d);
+  });
+}
+function refreshDots(){
+  QS.forEach((q,i)=>{
+    const d=document.getElementById('d'+i);if(!d)return;
+    d.className='dot'+(answers[q.n]!==undefined?' answered':'')+(i===curQ?' current':'');
+  });
+}
+
+// ═══════════════════════════════════════
+// RENDER Q
+// ═══════════════════════════════════════
+function renderQ(){
+  const q=QS[curQ];
+  const sec=getSec(q.n);
+  const ansCount=Object.keys(answers).length;
+
+  document.getElementById('sec-badge').textContent=sec.name;
+  document.getElementById('prog-fill').style.width=((curQ+1)/QS.length*100)+'%';
+  document.getElementById('prog-txt').textContent='Soal '+(curQ+1)+' dari '+QS.length;
+  document.getElementById('ans-count').textContent=ansCount+' dijawab';
+
+  // section header — show only at first Q of section
+  const firstOfSec=QS.findIndex(x=>x.s===q.s);
+  const sh=document.getElementById('sec-header-area');
+  if(curQ===firstOfSec){
+    sh.innerHTML=`<div class="sec-header"><span class="sec-header-name">${sec.full}</span><span class="sec-header-range">No. ${sec.lo}–${sec.hi}</span></div>`;
+  } else {sh.innerHTML='';}
+
+  // passage — always show on every Q that has a passage
+  const pa=document.getElementById('passage-area');
+  if(q.p && PASS[q.p]){
+    pa.innerHTML=`<div class="passage-box"><div class="passage-title">${PASS[q.p].title}</div>${PASS[q.p].html}</div>`;
+  } else {pa.innerHTML='';}
+
+  // options
+  const sel=answers[q.n];
+  const opts=['A','B','C','D','E'].map(k=>`<button class="opt${sel===k?' selected':''}" onclick="pick(${q.n},'${k}')"><span class="opt-key">${k}</span><span>${q[k]}</span></button>`).join('');
+  document.getElementById('q-area').innerHTML=`
+    <div class="q-card">
+      <div class="q-meta"><span class="q-num-badge">No. ${q.n}</span><span class="q-sec-tag">${sec.name}</span></div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${opts}</div>
+    </div>`;
+
+  document.getElementById('btn-prev').disabled=curQ===0;
+  const isLast=curQ===QS.length-1;
+  document.getElementById('btn-next').style.display=isLast?'none':'';
+  document.getElementById('btn-submit').style.display=isLast?'':'none';
+  refreshDots();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function pick(no,key){answers[no]=key;renderQ();}
+function goTo(i){if(i<0||i>=QS.length)return;curQ=i;renderQ();}
+
+function confirmSubmit(){
+  const unanswered=QS.filter(q=>answers[q.n]===undefined).length;
+  if(unanswered>0){
+    if(!confirm('Masih ada '+unanswered+' soal yang belum dijawab.\n\nYakin ingin mengumpulkan sekarang?'))return;
+  }
+  submitExam();
+}
+
+// ═══════════════════════════════════════
+// SUBMIT & SCORE
+// ═══════════════════════════════════════
+function submitExam(){
+  clearInterval(timerInt);showTopbar(false);
+  let cor=0,wrg=0,skp=0;
+  wrongList=[];
+  const secStat={};
+  Object.values(SECS).forEach(s=>secStat[s.full]={total:s.hi-s.lo+1,cor:0,wrg:0,skp:0});
+  QS.forEach(q=>{
+    const sf=getSec(q.n).full;
+    const a=answers[q.n];
+    if(!a){skp++;secStat[sf].skp++;}
+    else if(a===q.a){cor++;secStat[sf].cor++;}
+    else{wrg++;secStat[sf].wrg++;wrongList.push(q.n);}
+  });
+  const score=cor*4-wrg;
+  const pct=Math.round(score/240*100);
+
+  document.getElementById('score-val').textContent=score;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+
+  let msg,grade,circleColor;
+  if(pct>=80){msg='Luar biasa! Sangat siap AKPOL ';grade='Nilai A — Peluang lolos sangat tinggi';circleColor='#059669';}
+  else if(pct>=65){msg='Bagus! Terus tingkatkan';grade='Nilai B — Butuh sedikit perbaikan';circleColor='#1d4ed8';}
+  else if(pct>=50){msg='Cukup baik, perlu lebih giat';grade='Nilai C — Fokus review soal yang salah';circleColor='#d97706';}
+  else{msg='Semangat, perlu banyak latihan';grade='Nilai D — Pelajari ulang semua materi';circleColor='#b91c1c';}
+  document.getElementById('score-msg').textContent=msg;
+  document.getElementById('score-grade').textContent=grade;
+  document.getElementById('score-circle').style.borderColor=circleColor;
+  document.getElementById('score-val').style.color=circleColor;
+
+  // breakdown
+  let bd='';
+  Object.entries(secStat).forEach(([name,st])=>{
+    const acc=st.total>0?Math.round(st.cor/st.total*100):0;
+    const c=acc>=70?'#059669':acc>=50?'#d97706':'#b91c1c';
+    const bar=Math.round(acc);
+    bd+=`<div class="brow">
+      <span class="brow-name">${name.replace('Section ','Sec. ')}</span>
+      <div style="flex:1;max-width:120px;height:6px;background:#f3f4f6;border-radius:3px;margin:0 10px;overflow:hidden"><div style="height:100%;width:${bar}%;background:${c};border-radius:3px"></div></div>
+      <span class="brow-stat">${st.cor}/${st.total}</span>
+      <span class="brow-pct" style="color:${c}">${acc}%</span>
+    </div>`;
+  });
+  document.getElementById('breakdown').innerHTML=bd;
+
+  if(wrongList.length>0){
+    document.getElementById('wrong-box').style.display='';
+    document.getElementById('wrong-nums').textContent='No. '+wrongList.join(', ');
+    document.getElementById('btn-review-start').style.display='';
+  } else {
+    document.getElementById('wrong-box').style.display='none';
+    document.getElementById('btn-review-start').style.display='none';
+  }
+
+  showScr('scr-score');
+}
+
+// ═══════════════════════════════════════
+// REVIEW (wrong only)
+// ═══════════════════════════════════════
+function startReview(){
+  revIdx=0;
+  showScr('scr-review');
+  renderReview();
+}
+function revNav(d){
+  revIdx=Math.max(0,Math.min(wrongList.length-1,revIdx+d));
+  renderReview();
+}
+function renderReview(){
+  if(!wrongList.length)return;
+  const no=wrongList[revIdx];
+  const q=QS.find(x=>x.n===no);
+  const sec=getSec(q.n);
+  const userAns=answers[q.n];
+
+  document.getElementById('rev-prog').style.width=((revIdx+1)/wrongList.length*100)+'%';
+  document.getElementById('rev-prog-txt').textContent='Review '+(revIdx+1)+' dari '+wrongList.length+' soal salah';
+
+  // passage (show always in review if q has passage)
+  let passHtml='';
+  if(q.p){
+    passHtml=`<div class="passage-box"><div class="passage-title">${PASS[q.p].title}</div>${PASS[q.p].html}</div>`;
+  }
+
+  const opts=['A','B','C','D','E'].map(k=>{
+    let cls='normal', tag='';
+    if(k===q.a){cls='correct';tag='<span class="ropt-tag" style="color:#16a34a">&#10003; Jawaban benar</span>';}
+    else if(k===userAns){cls='wrong-chosen';tag='<span class="ropt-tag" style="color:#b91c1c">&#10007; Jawabanmu</span>';}
+    return `<div class="ropt ${cls}"><span class="ropt-key">${k}</span><span style="flex:1">${q[k]}</span>${tag}</div>`;
+  }).join('');
+
+  document.getElementById('rev-area').innerHTML=`
+    ${passHtml}
+    <div class="review-card">
+      <div class="rmeta">
+        <span class="rbadge-wrong">&#10007; Salah</span>
+        <span class="rbadge-sec">No. ${q.n}</span>
+        <span class="rbadge-sec">${sec.name}</span>
+        ${userAns?`<span class="rbadge-your">Jawabanmu: ${userAns}</span>`:`<span class="rbadge-your">Tidak dijawab</span>`}
+      </div>
+      <div class="q-text">${q.q}</div>
+      <div class="review-opts">${opts}</div>
+      <div class="exp-box"><div class="exp-label">Penjelasan</div>${q.e}</div>
+    </div>`;
+
+  document.getElementById('rbtn-prev').disabled=revIdx===0;
+  document.getElementById('rbtn-next').style.display=revIdx<wrongList.length-1?'':'none';
+  document.getElementById('rbtn-done').style.display=revIdx===wrongList.length-1?'':'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
